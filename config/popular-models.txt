@@ -1,0 +1,58 @@
+# Популярные модели Ollama
+# Источник: https://ollama.com/search
+# Отредактируйте файл, оставив нужные модели, затем запустите:
+#   .\offlineLLM.ps1 export -ModelsFile этот-файл.txt -ArchiveDir .\archives
+#
+# Формат строки:
+#   model           — тег latest по умолчанию
+#   model:tag       — конкретный тег/размер
+
+# === Универсальные LLM ===
+llama3.3
+llama3.2
+llama3.2:1b
+llama3.1:8b
+llama3.1:70b
+mistral
+mistral-nemo
+gemma3:4b
+gemma3:12b
+gemma2:9b
+gemma2:27b
+qwen2.5:7b
+qwen2.5:14b
+qwen2.5:72b
+phi4
+phi3.5
+command-r
+solar
+neural-chat
+wizardlm2
+tinyllama
+
+# === Кодирование ===
+qwen2.5-coder:7b
+qwen2.5-coder:14b
+codellama
+codellama:34b
+deepseek-coder-v2
+codegemma
+starcoder2
+
+# === Рассуждения (Reasoning) ===
+deepseek-r1:7b
+deepseek-r1:14b
+deepseek-r1:32b
+deepseek-r1:70b
+
+# === Мультимодальные (изображения) ===
+llava
+llava-phi3
+moondream
+bakllava
+
+# === Встраивания (Embeddings) ===
+nomic-embed-text
+mxbai-embed-large
+bge-m3
+all-minilm
