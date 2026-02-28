@@ -1,13 +1,26 @@
 # OfflineLLM
 
 Утилита для экспорта и импорта моделей [Ollama](https://ollama.com) между машинами.
-Позволяет перенести модели с компьютера с интернетом на компьютер без интернета.
+Позволяет перенести модели с компьютера с интернетом на офлайн-машину — **Windows или Linux**.
+
+## Скрипты
+
+| Скрипт | Платформа | Назначение |
+|--------|-----------|------------|
+| `offlineLLM.ps1` | Windows | Список моделей, экспорт, импорт |
+| `import-linux.sh` | Linux (RHEL/CentOS/Fedora) | Импорт архивов на Linux-сервер |
 
 ## Требования
 
+### Windows (`offlineLLM.ps1`)
 - Windows 10 1803+ (для поддержки `tar.exe`) или Windows 11
-- [Ollama](https://ollama.com/download) установлена на обеих машинах
+- [Ollama](https://ollama.com/download) установлена
 - PowerShell 5.1+ (встроен в Windows)
+
+### Linux (`import-linux.sh`)
+- Red Hat / RHEL 8+ (или CentOS Stream, Rocky, AlmaLinux, Fedora)
+- [Ollama](https://ollama.com/download) установлена
+- `bash` 4.0+, `tar` (по умолчанию присутствуют)
 
 ## Быстрый старт
 
@@ -27,19 +40,26 @@
 
 Каждая модель сохранится как отдельный `.tar` файл в папке `archives\`.
 
-### 3. Скопировать папку `archives\` на офлайн-машину
+### 3. Скопировать папку `archives\` на целевую машину
 
 Используйте USB-накопитель, внешний диск или локальную сеть.
 
-### 4. На офлайн-машине — импортировать модели
+### 4а. Импорт на Windows
 
 ```powershell
 .\offlineLLM.ps1 import -ArchiveDir .\archives
 ```
 
+### 4б. Импорт на Linux (Red Hat / RHEL)
+
+```bash
+chmod +x import-linux.sh
+./import-linux.sh -d ./archives -r
+```
+
 ### 5. Проверить импортированные модели
 
-```powershell
+```bash
 ollama list
 ollama run llama3.2 "Привет!"
 ```
@@ -148,7 +168,8 @@ Start-Service ollama
 ## Документация
 
 - [Архитектура](docs/architecture.md)
-- [Руководство по использованию](docs/usage.md)
+- [Руководство по использованию (Windows)](docs/usage.md)
+- [Импорт на Linux / Red Hat](docs/linux-import.md)
 - [Руководство разработчика](docs/development.md)
 
 ## Лицензия

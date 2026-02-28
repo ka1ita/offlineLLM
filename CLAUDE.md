@@ -17,18 +17,23 @@ internet-connected and air-gapped (offline) machines.
 offlineLLM/
 ├── CLAUDE.md                   # This file — instructions for Claude Code
 ├── README.md                   # User-facing documentation (Russian)
-├── offlineLLM.ps1              # Main script — all functionality
+├── offlineLLM.ps1              # Main Windows script — all functionality
+├── import-linux.sh             # Linux import script (Red Hat / RHEL)
 ├── config/
 │   └── popular-models.txt      # Curated list of popular Ollama models
 ├── docs/
 │   ├── architecture.md         # Technical architecture
-│   ├── usage.md                # Usage guide with examples
+│   ├── usage.md                # Usage guide with examples (Windows)
+│   ├── linux-import.md         # Linux import guide (Red Hat / RHEL)
 │   └── development.md          # Developer guide
 └── tasks/
-    └── 1-init.md               # Original task specification
+    ├── 1-init.md               # Original task specification
+    └── 2-migrate-to-zip.md     # Linux import task specification
 ```
 
-## Key Commands (script interface)
+## Key Commands
+
+### Windows (offlineLLM.ps1)
 
 ```powershell
 .\offlineLLM.ps1 list-popular   [-OutputFile models.txt] [-Count 50]
@@ -36,6 +41,20 @@ offlineLLM/
 .\offlineLLM.ps1 export         [-ModelsFile models.txt] [-ArchiveDir .\archives] [-Force]
 .\offlineLLM.ps1 import         [-ArchiveDir .\archives] [-OllamaDir <path>] [-Force]
 ```
+
+### Linux / Red Hat (import-linux.sh)
+
+```bash
+chmod +x import-linux.sh
+./import-linux.sh [-d archive_dir] [-o ollama_dir] [-f] [-r]
+```
+
+| Flag | Meaning |
+|------|---------|
+| `-d DIR` | Archive directory (default: `./archives`) |
+| `-o DIR` | Ollama models dir (default: `$OLLAMA_MODELS` or `~/.ollama/models`) |
+| `-f` | Force overwrite existing files |
+| `-r` | Restart Ollama service after import (`systemctl restart ollama`) |
 
 ## Ollama Model Storage
 
