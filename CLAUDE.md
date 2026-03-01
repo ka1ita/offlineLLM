@@ -2,13 +2,14 @@
 
 ## Project Overview
 
-Windows console utility for exporting and importing Ollama AI models between
+Cross-platform utility for exporting and importing Ollama AI models between
 internet-connected and air-gapped (offline) machines.
 
 ## Tech Stack
 
-- **Language**: PowerShell 5.1+ (no external dependencies required)
-- **Archive format**: `.tar` via `tar.exe` (Windows 10 1803+), fallback to Compress-Archive
+- **Windows**: PowerShell 5.1+ (no external dependencies required)
+- **Linux**: Bash 4.0+, requires `jq` or `python3` for export (JSON parsing)
+- **Archive format**: `.tar` (Windows: `tar.exe` Win10 1803+, fallback Compress-Archive)
 - **Ollama API**: direct file access to `~/.ollama/models/` directory
 
 ## Project Structure
@@ -18,7 +19,7 @@ offlineLLM/
 ├── CLAUDE.md                   # This file — instructions for Claude Code
 ├── README.md                   # User-facing documentation (Russian)
 ├── offlineLLM.ps1              # Main Windows script — all functionality
-├── import-linux.sh             # Linux import script (Red Hat / RHEL)
+├── offlineLLM.sh               # Main Linux script — all functionality
 ├── config/
 │   └── popular-models.txt      # Curated list of popular Ollama models
 ├── docs/
@@ -42,17 +43,23 @@ offlineLLM/
 .\offlineLLM.ps1 import         [-ArchiveDir .\archives] [-OllamaDir <path>] [-Force]
 ```
 
-### Linux / Red Hat (import-linux.sh)
+### Linux (offlineLLM.sh)
 
 ```bash
-chmod +x import-linux.sh
-./import-linux.sh [-d archive_dir] [-o ollama_dir] [-f] [-r]
+chmod +x offlineLLM.sh
+./offlineLLM.sh list-popular   [-o models.txt] [-n 50]
+./offlineLLM.sh list-installed
+./offlineLLM.sh export         [-m models.txt] [-d ./archives] [-p ollama_dir] [-f]
+./offlineLLM.sh import         [-d ./archives] [-p ollama_dir] [-f] [-r]
 ```
 
 | Flag | Meaning |
 |------|---------|
-| `-d DIR` | Archive directory (default: `./archives`) |
-| `-o DIR` | Ollama models dir (default: `$OLLAMA_MODELS` or `~/.ollama/models`) |
+| `-o FILE` | Output file for list-popular (default: `models.txt`) |
+| `-n N` | Model count for list-popular (default: `50`) |
+| `-m FILE` | Models list file for export (default: `models.txt`) |
+| `-d DIR` | Archive directory for export/import (default: `./archives`) |
+| `-p DIR` | Ollama models dir (default: `$OLLAMA_MODELS` or `~/.ollama/models`) |
 | `-f` | Force overwrite existing files |
 | `-r` | Restart Ollama service after import (`systemctl restart ollama`) |
 

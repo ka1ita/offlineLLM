@@ -1,57 +1,68 @@
-# Импорт моделей Ollama на Linux (Red Hat / RHEL)
+# Использование OfflineLLM на Linux
 
-Скрипт `import-linux.sh` импортирует `.tar`-архивы, созданные командой
-`offlineLLM.ps1 export` на Windows, в Ollama на Linux-сервере.
+Скрипт `offlineLLM.sh` — полный Linux-аналог `offlineLLM.ps1`. Поддерживает список
+популярных моделей, просмотр установленных, экспорт и импорт `.tar`-архивов.
 
 ## Требования
 
-- Red Hat Enterprise Linux 8/9 (или CentOS Stream, Fedora, Rocky Linux, AlmaLinux)
+- Linux (Red Hat / RHEL 8+, CentOS Stream, Rocky, AlmaLinux, Fedora, Ubuntu 20.04+)
 - [Ollama](https://ollama.com/download) установлена
 - `bash` 4.0+, `tar` (присутствуют по умолчанию)
-- Доступ к файловой системе каталога моделей Ollama
+- `jq` **или** `python3` — только для команды `export` (разбор JSON-манифестов)
 
 ## Установка
 
 ```bash
 # Скопируйте скрипт на сервер (вместе с архивами)
-scp import-linux.sh user@server:/home/user/
-scp -r archives/    user@server:/home/user/
+scp offlineLLM.sh user@server:/home/user/
+scp -r archives/   user@server:/home/user/
 
 # Сделайте скрипт исполняемым
-chmod +x import-linux.sh
+chmod +x offlineLLM.sh
 ```
 
-## Использование
+## Команды
 
 ```bash
-./import-linux.sh [ОПЦИИ]
+./offlineLLM.sh <команда> [параметры]
 ```
 
-| Опция | По умолчанию | Описание |
-|-------|--------------|----------|
-| `-d DIR` | `./archives` | Каталог с `.tar`-архивами |
-| `-o DIR` | `$OLLAMA_MODELS` или `~/.ollama/models` | Каталог моделей Ollama |
-| `-f` | — | Перезаписать существующие файлы |
-| `-r` | — | Перезапустить службу Ollama после импорта |
-| `-h` | — | Показать справку |
+| Команда | Описание |
+|---------|----------|
+| `list-popular` | Создать файл со списком популярных моделей |
+| `list-installed` | Показать установленные модели |
+| `export` | Экспортировать модели в `.tar` архивы |
+| `import` | Импортировать `.tar` архивы в Ollama |
+
+## Параметры
+
+| Опция | Команды | По умолчанию | Описание |
+|-------|---------|--------------|----------|
+| `-o FILE` | list-popular | `models.txt` | Выходной файл |
+| `-n N` | list-popular | `50` | Количество моделей |
+| `-m FILE` | export | `models.txt` | Файл со списком моделей |
+| `-d DIR` | export, import | `./archives` | Каталог с `.tar`-архивами |
+| `-p DIR` | export, import | `$OLLAMA_MODELS` или `~/.ollama/models` | Каталог моделей Ollama |
+| `-f` | export, import | — | Перезаписать существующие файлы |
+| `-r` | import | — | Перезапустить службу Ollama после импорта |
 
 ## Примеры
 
 ```bash
 # Базовый импорт из ./archives
-./import-linux.sh
+./offlineLLM.sh import
 
 # Импорт с USB-накопителя
-./import-linux.sh -d /mnt/usb/archives
+./offlineLLM.sh import -d /mnt/usb/archives
 
 # Импорт и перезапуск службы
-./import-linux.sh -d /mnt/usb/archives -r
+./offlineLLM.sh import -d /mnt/usb/archives -r
 
 # Принудительная перезапись + перезапуск
-./import-linux.sh -d /mnt/usb/archives -f -r
+./offlineLLM.sh import -d /mnt/usb/archives -f -r
 
 # Когда Ollama запущена от другого пользователя (например, системная служба)
-sudo ./import-linux.sh -d /mnt/usb/archives -o /usr/share/ollama/.ollama/models -r
+sudo ./offlineLLM.sh import -d /mnt/usb/archives -p /usr/share/ollama/.ollama/models -r
 ```
 
 ## Типичный сценарий: перенос с Windows
@@ -67,29 +78,47 @@ sudo ./import-linux.sh -d /mnt/usb/archives -o /usr/share/ollama/.ollama/models 
 ```bash
 # Через SCP
 scp archives/*.tar user@linux-server:/home/user/archives/
-scp import-linux.sh user@linux-server:/home/user/
+scp offlineLLM.sh  user@linux-server:/home/user/
 
 # Через USB (если нет сети)
-# Скопируйте вручную, затем смонтируйте:
 sudo mount /dev/sdb1 /mnt/usb
 ```
 
 ### На Linux-сервере
 
 ```bash
-chmod +x import-linux.sh
-./import-linux.sh -d ./archives -r
+chmod +x offlineLLM.sh
+./offlineLLM.sh import -d ./archives -r
 
 # Проверка
 ollama list
 ollama run llama3.2 "Hello!"
 ```
 
+## Типичный сценарий: перенос с Linux на Linux
+
+### На Linux-машине с интернетом
+
+```bash
+# Составить список моделей
+./offlineLLM.sh list-popular -o models.txt
+nano models.txt  # оставьте только нужные
+
+# Экспортировать (требуется jq или python3)
+./offlineLLM.sh export -m models.txt -d ./archives
+```
+
+### На офлайн Linux-сервере
+
+```bash
+./offlineLLM.sh import -d ./archives -r
+```
+
 ## Определение каталога моделей
 
 Скрипт ищет каталог в следующем порядке:
 
-1. Флаг `-o DIR` (явное указание)
+1. Флаг `-p DIR` (явное указание)
 2. Переменная окружения `$OLLAMA_MODELS`
 3. `~/.ollama/models` (по умолчанию)
 
@@ -107,7 +136,7 @@ ps aux | grep ollama
 
 ## SELinux на Red Hat
 
-На RHEL с включённым SELinux скрипт автоматически запускает `restorecon`:
+Скрипт автоматически запускает `restorecon` после импорта, если он доступен:
 
 ```bash
 restorecon -r ~/.ollama/models
@@ -162,8 +191,19 @@ ollama list
 ```bash
 # Если Ollama запущена как пользователь 'ollama'
 sudo chown -R ollama:ollama /usr/share/ollama/.ollama/models
-# или
-sudo ./import-linux.sh -o /usr/share/ollama/.ollama/models
+# или импортируйте от имени нужного пользователя:
+sudo ./offlineLLM.sh import -p /usr/share/ollama/.ollama/models
+```
+
+### Ошибка "jq не найден" при экспорте
+
+```bash
+# RHEL/CentOS/Fedora
+sudo dnf install jq
+# Ubuntu/Debian
+sudo apt install jq
+# Альтернатива — python3 (обычно уже установлен)
+python3 --version
 ```
 
 ### SELinux: Permission denied
@@ -176,7 +216,7 @@ sudo chcon -Rt svirt_sandbox_file_t ~/.ollama/models/
 
 ### tar: error opening archive / file not found
 
-Убедитесь, что архивы сформированы скриптом `offlineLLM.ps1` (формат `.tar`, не `.zip`):
+Убедитесь, что архивы сформированы корректно (формат `.tar`):
 ```bash
 file archives/llama3.2-latest.tar
 # Ожидаемый вывод: POSIX tar archive

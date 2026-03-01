@@ -8,7 +8,7 @@
 | Скрипт | Платформа | Назначение |
 |--------|-----------|------------|
 | `offlineLLM.ps1` | Windows | Список моделей, экспорт, импорт |
-| `import-linux.sh` | Linux (RHEL/CentOS/Fedora) | Импорт архивов на Linux-сервер |
+| `offlineLLM.sh` | Linux (RHEL/CentOS/Fedora/Ubuntu) | Список моделей, экспорт, импорт |
 
 ## Требования
 
@@ -17,30 +17,43 @@
 - [Ollama](https://ollama.com/download) установлена
 - PowerShell 5.1+ (встроен в Windows)
 
-### Linux (`import-linux.sh`)
-- Red Hat / RHEL 8+ (или CentOS Stream, Rocky, AlmaLinux, Fedora)
+### Linux (`offlineLLM.sh`)
+- Bash 4.0+, `tar` (по умолчанию присутствуют)
 - [Ollama](https://ollama.com/download) установлена
-- `bash` 4.0+, `tar` (по умолчанию присутствуют)
+- `jq` **или** `python3` — для команды `export` (разбор JSON-манифестов)
 
 ## Быстрый старт
 
 ### 1. На машине с интернетом — составить список моделей
 
+**Windows:**
 ```powershell
 .\offlineLLM.ps1 list-popular -OutputFile models.txt
+```
+
+**Linux:**
+```bash
+chmod +x offlineLLM.sh
+./offlineLLM.sh list-popular -o models.txt
 ```
 
 Откройте `models.txt` и оставьте только нужные модели (удалите остальные строки).
 
 ### 2. На машине с интернетом — экспортировать модели
 
+**Windows:**
 ```powershell
 .\offlineLLM.ps1 export -ModelsFile models.txt -ArchiveDir .\archives
 ```
 
-Каждая модель сохранится как отдельный `.tar` файл в папке `archives\`.
+**Linux:**
+```bash
+./offlineLLM.sh export -m models.txt -d ./archives
+```
 
-### 3. Скопировать папку `archives\` на целевую машину
+Каждая модель сохранится как отдельный `.tar` файл в папке `archives/`.
+
+### 3. Скопировать папку `archives/` на целевую машину
 
 Используйте USB-накопитель, внешний диск или локальную сеть.
 
@@ -50,11 +63,10 @@
 .\offlineLLM.ps1 import -ArchiveDir .\archives
 ```
 
-### 4б. Импорт на Linux (Red Hat / RHEL)
+### 4б. Импорт на Linux
 
 ```bash
-chmod +x import-linux.sh
-./import-linux.sh -d ./archives -r
+./offlineLLM.sh import -d ./archives -r
 ```
 
 ### 5. Проверить импортированные модели
@@ -77,39 +89,58 @@ ollama run llama3.2 "Привет!"
 
 ### `list-popular`
 
+**Windows:**
 ```powershell
 .\offlineLLM.ps1 list-popular [-OutputFile <путь>] [-Count <число>]
 ```
 
-| Параметр | По умолчанию | Описание |
-|----------|--------------|----------|
-| `-OutputFile` | `models.txt` | Путь к выходному файлу |
-| `-Count` | `50` | Максимальное количество онлайн-моделей |
+**Linux:**
+```bash
+./offlineLLM.sh list-popular [-o <путь>] [-n <число>]
+```
+
+| Параметр (Windows) | Параметр (Linux) | По умолчанию | Описание |
+|--------------------|------------------|--------------|----------|
+| `-OutputFile` | `-o FILE` | `models.txt` | Путь к выходному файлу |
+| `-Count` | `-n N` | `50` | Максимальное количество онлайн-моделей |
 
 ### `export`
 
+**Windows:**
 ```powershell
 .\offlineLLM.ps1 export [-ModelsFile <путь>] [-ArchiveDir <путь>] [-OllamaDir <путь>] [-Force]
 ```
 
-| Параметр | По умолчанию | Описание |
-|----------|--------------|----------|
-| `-ModelsFile` | `models.txt` | Файл со списком моделей |
-| `-ArchiveDir` | `.\archives` | Папка для сохранения архивов |
-| `-OllamaDir` | авто | Путь к каталогу моделей Ollama |
-| `-Force` | — | Перезаписать существующие архивы |
+**Linux:**
+```bash
+./offlineLLM.sh export [-m <путь>] [-d <путь>] [-p <путь>] [-f]
+```
+
+| Параметр (Windows) | Параметр (Linux) | По умолчанию | Описание |
+|--------------------|------------------|--------------|----------|
+| `-ModelsFile` | `-m FILE` | `models.txt` | Файл со списком моделей |
+| `-ArchiveDir` | `-d DIR` | `./archives` | Папка для сохранения архивов |
+| `-OllamaDir` | `-p DIR` | авто | Путь к каталогу моделей Ollama |
+| `-Force` | `-f` | — | Перезаписать существующие архивы |
 
 ### `import`
 
+**Windows:**
 ```powershell
 .\offlineLLM.ps1 import [-ArchiveDir <путь>] [-OllamaDir <путь>] [-Force]
 ```
 
-| Параметр | По умолчанию | Описание |
-|----------|--------------|----------|
-| `-ArchiveDir` | `.\archives` | Папка с архивами |
-| `-OllamaDir` | авто | Путь к каталогу моделей Ollama |
-| `-Force` | — | Перезаписать существующие файлы |
+**Linux:**
+```bash
+./offlineLLM.sh import [-d <путь>] [-p <путь>] [-f] [-r]
+```
+
+| Параметр (Windows) | Параметр (Linux) | По умолчанию | Описание |
+|--------------------|------------------|--------------|----------|
+| `-ArchiveDir` | `-d DIR` | `./archives` | Папка с архивами |
+| `-OllamaDir` | `-p DIR` | авто | Путь к каталогу моделей Ollama |
+| `-Force` | `-f` | — | Перезаписать существующие файлы |
+| — | `-r` | — | Перезапустить Ollama после импорта |
 
 ## Формат файла моделей
 
@@ -125,6 +156,8 @@ phi4
 
 ## Примеры
 
+### Windows
+
 ```powershell
 # Экспорт конкретных моделей
 echo "llama3.2`nmixtral:8x7b" | Out-File models.txt
@@ -135,6 +168,24 @@ echo "llama3.2`nmixtral:8x7b" | Out-File models.txt
 
 # Принудительная перезапись
 .\offlineLLM.ps1 export -ModelsFile models.txt -Force
+```
+
+### Linux
+
+```bash
+# Получить список популярных моделей, отредактировать, экспортировать
+./offlineLLM.sh list-popular -o models.txt
+nano models.txt
+./offlineLLM.sh export -m models.txt -d ./archives
+
+# Импорт с USB-носителя и перезапуском сервиса
+./offlineLLM.sh import -d /mnt/usb/archives -r
+
+# Импорт в нестандартный каталог Ollama (например, системный пользователь)
+sudo ./offlineLLM.sh import -d ./archives -p /usr/share/ollama/.ollama/models
+
+# Принудительная перезапись существующих файлов
+./offlineLLM.sh import -d ./archives -f -r
 ```
 
 ## Типичные размеры моделей
@@ -151,19 +202,39 @@ echo "llama3.2`nmixtral:8x7b" | Out-File models.txt
 
 ## Устранение проблем
 
-**Модели не отображаются после импорта:**
+**Модели не отображаются после импорта (Windows):**
 ```powershell
-# Перезапустите службу Ollama
 Stop-Service ollama -ErrorAction SilentlyContinue
 Start-Service ollama
 # или перезапустите приложение Ollama из трея
 ```
 
-**Ошибка "tar не найден":**
-Обновите Windows до версии 1803+. Альтернативно установите [7-Zip](https://www.7-zip.org/).
+**Модели не отображаются после импорта (Linux):**
+```bash
+sudo systemctl restart ollama
+# или при запуске вручную: перезапустите процесс ollama serve
+```
+
+**Ошибка "tar не найден" (Windows):**
+Обновите Windows до версии 1803+.
+
+**Ошибка "jq не найден" при экспорте (Linux):**
+```bash
+# RHEL/CentOS/Fedora
+sudo dnf install jq
+# Ubuntu/Debian
+sudo apt install jq
+# Альтернатива без установки — достаточно python3 (обычно уже есть)
+```
 
 **Нет прав на запись в каталог Ollama:**
-Запустите PowerShell от имени администратора или измените `-OllamaDir` на папку без ограничений.
+- Windows: запустите PowerShell от имени администратора или укажите `-OllamaDir` в доступную папку
+- Linux: запустите от имени пользователя `ollama` или используйте `sudo` с флагом `-p`
+
+**SELinux блокирует доступ к файлам (RHEL):**
+```bash
+sudo restorecon -r ~/.ollama/models
+```
 
 ## Документация
 
