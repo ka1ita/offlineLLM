@@ -1,0 +1,14 @@
+---
+description: Контекст проекта OfflineLLM — экспорт/импорт моделей Ollama
+alwaysApply: true
+---
+
+# OfflineLLM
+
+Утилита для экспорта и импорта моделей Ollama между машиной с интернетом и изолированной (offline).
+
+- **Windows**: `offlineLLM.ps1` (PowerShell 5.1+)
+- **Linux**: `offlineLLM.sh` (Bash 4+, для экспорта нужен `jq` или `python3`)
+- Хранение Ollama: `~/.ollama/models/` (manifests + blobs), архивы — `.tar` по одному на модель
+
+Пользовательские сообщения и вывод — на **русском**. Ошибки — в stderr, таблицы/списки — в stdout. Подробности в `CLAUDE.md`.
