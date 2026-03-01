@@ -25,7 +25,7 @@ offlineLLM/
 ├── docs/
 │   ├── architecture.md         # Technical architecture
 │   ├── usage.md                # Usage guide with examples (Windows)
-│   ├── linux-import.md         # Linux import guide (Red Hat / RHEL)
+│   ├── usage-linux.md          # Usage guide with examples (Linux)
 │   └── development.md          # Developer guide
 └── tasks/
     ├── 1-init.md               # Original task specification

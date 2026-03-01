@@ -240,7 +240,7 @@ sudo restorecon -r ~/.ollama/models
 
 - [Архитектура](docs/architecture.md)
 - [Руководство по использованию (Windows)](docs/usage.md)
-- [Импорт на Linux / Red Hat](docs/linux-import.md)
+- [Руководство по использованию (Linux)](docs/usage-linux.md)
 - [Руководство разработчика](docs/development.md)
 
 ## Лицензия
