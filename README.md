@@ -87,6 +87,20 @@ ollama run llama3.2 "Привет!"
 
 ## Параметры
 
+### `list-installed`
+
+**Windows:**
+```powershell
+.\offlineLLM.ps1 list-installed
+```
+
+**Linux:**
+```bash
+./offlineLLM.sh list-installed
+```
+
+Выводит таблицу установленных моделей (обёртка над `ollama list`). Параметров нет.
+
 ### `list-popular`
 
 **Windows:**
@@ -173,6 +187,9 @@ echo "llama3.2`nmixtral:8x7b" | Out-File models.txt
 ### Linux
 
 ```bash
+# Посмотреть установленные модели
+./offlineLLM.sh list-installed
+
 # Получить список популярных моделей, отредактировать, экспортировать
 ./offlineLLM.sh list-popular -o models.txt
 nano models.txt
